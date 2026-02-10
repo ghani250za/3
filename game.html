@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <title>Jeu LSP : Langue de Spécialité</title>
+    <style>
+        body { font-family: 'Verdana', sans-serif; background-color: #eef2f3; text-align: center; padding: 20px; }
+        .container { max-width: 700px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-top: 5px solid #8e44ad; }
+        h1 { color: #8e44ad; }
+        .score-board { font-size: 1.2em; color: #555; margin-bottom: 20px; }
+        .question-box { background: #f9f9f9; padding: 20px; border-left: 4px solid #3498db; margin: 20px 0; text-align: left; font-size: 1.1em; }
+        .options { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        button { padding: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1em; cursor: pointer; background: white; transition: all 0.3s; text-align: left; }
+        button:hover { background: #f0f0f0; border-color: #aaa; }
+        button.correct { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+        button.wrong { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .hidden { display: none; }
+        #feedback { margin-top: 15px; font-weight: bold; }
+        .explanation { font-size: 0.9em; color: #666; margin-top: 5px; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🎓 Quiz : Langues de Spécialité</h1>
+    <div class="score-board">Score: <span id="score">0</span></div>
+    
+    <div id="game-area">
+        <div class="question-box" id="question-text">Chargement...</div>
+        <div class="options" id="options-container"></div>
+        <div id="feedback"></div>
+        <div id="explanation" class="explanation"></div>
+        <br>
+        <button id="next-btn" class="hidden" style="text-align:center; background:#8e44ad; color:white;" onclick="nextQuestion()">Question Suivante ➡️</button>
+    </div>
+
+    <div id="result-area" class="hidden">
+        <h2>Félicitations ! 🎓</h2>
+        <p>Tu as terminé la révision du module LSP.</p>
+        <p id="final-score"></p>
+        <button onclick="location.reload()" style="text-align:center; background:#2c3e50; color:white;">Recommencer 🔄</button>
+    </div>
+</div>
+
+<script>
+    // الأسئلة مأخوذة مباشرة من الملخص الذي قدمته
+    const questions = [
+        { 
+            q: "Selon les fonctionnalistes (Halliday & Matthiessen), quelle est la place du lexique ?", 
+            options: [
+                "C'est une composante de base de la grammaire.",
+                "C'est une facette du système qui contribue au sens global.",
+                "Il ne fait pas partie de la langue."
+            ], 
+            answer: 1,
+            exp: "Pour les générativistes, c'est une composante de la grammaire. Pour les fonctionnalistes, il contribue au sens global."
+        },
+        { 
+            q: "Quelle est la différence fondamentale entre Lexique Général et Lexique Spécialisé concernant le SENS ?", 
+            options: [
+                "Général = Monosémie | Spécialisé = Polysémie",
+                "Général = Polysémie | Spécialisé = Monosémie",
+                "Les deux sont polysémiques."
+            ], 
+            answer: 1,
+            exp: "Le lexique spécialisé tend vers l'univocité (un seul sens) et la précision."
+        },
+        { 
+            q: "Comment appelle-t-on un sigle qui se prononce comme un mot (ex: Radar) ?", 
+            options: [
+                "Une abréviation",
+                "Un sigle pur",
+                "Un acronyme"
+            ], 
+            answer: 2,
+            exp: "Sigle = prononcé lettre par lettre (PNL). Acronyme = prononcé comme un mot (Radar, Sida)."
+        },
+        { 
+            q: "Dans la formation des termes, qu'est-ce qu'un 'mot-valise' ?", 
+            options: [
+                "L'ajout d'affixes à une racine.",
+                "La fusion de deux mots (ex: Informatique).",
+                "Un mot emprunté au latin."
+            ], 
+            answer: 1,
+            exp: "Exemple : Information + Automatique = Informatique."
+        },
+        { 
+            q: "Quelle est une caractéristique majeure du Discours Scientifique ?", 
+            options: [
+                "L'usage intensif de la première personne (Je).",
+                "L'effacement énonciatif (usage du 'On' et voix passive).",
+                "L'expression forte des émotions."
+            ], 
+            answer: 1,
+            exp: "Le discours scientifique cherche l'objectivité et l'absence d'émotivité."
+        },
+        { 
+            q: "La relation sémantique où un terme spécifique est inclus dans un terme global (ex: Rose dans Fleur) est :", 
+            options: [
+                "L'Hyperonymie",
+                "L'Hyponymie",
+                "La Synonymie"
+            ], 
+            answer: 1,
+            exp: "Rose est un hyponyme de Fleur. Fleur est l'hyperonyme."
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    function loadQuestion() {
+        const q = questions[currentQuestionIndex];
+        document.getElementById("question-text").innerText = q.q;
+        const optionsDiv = document.getElementById("options-container");
+        optionsDiv.innerHTML = "";
+        document.getElementById("feedback").innerText = "";
+        document.getElementById("explanation").innerText = "";
+        document.getElementById("next-btn").classList.add("hidden");
+
+        q.options.forEach((opt, index) => {
+            const btn = document.createElement("button");
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(index, btn);
+            optionsDiv.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selectedIndex, btnElement) {
+        const q = questions[currentQuestionIndex];
+        const buttons = document.querySelectorAll(".options button");
+        
+        buttons.forEach(b => b.disabled = true);
+
+        if (selectedIndex === q.answer) {
+            btnElement.classList.add("correct");
+            document.getElementById("feedback").innerText = "Correct ! ✅";
+            document.getElementById("feedback").style.color = "#155724";
+            score++;
+            document.getElementById("score").innerText = score;
+        } else {
+            btnElement.classList.add("wrong");
+            buttons[q.answer].classList.add("correct");
+            document.getElementById("feedback").innerText = "Incorrect ❌";
+            document.getElementById("feedback").style.color = "#721c24";
+        }
+        document.getElementById("explanation").innerText = "💡 Note : " + q.exp;
+        document.getElementById("next-btn").classList.remove("hidden");
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+            loadQuestion();
+        } else {
+            document.getElementById("game-area").classList.add("hidden");
+            document.getElementById("result-area").classList.remove("hidden");
+            document.getElementById("final-score").innerText = "Votre score final : " + score + " / " + questions.length;
+        }
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
