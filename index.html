@@ -2,126 +2,325 @@
 <html lang="fr" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <title>Jeu LSP : Langue de Spécialité</title>
+    <title>Grand Quiz LSP : Bilingual</title>
     <style>
-        body { font-family: 'Verdana', sans-serif; background-color: #eef2f3; text-align: center; padding: 20px; }
-        .container { max-width: 700px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-top: 5px solid #8e44ad; }
-        h1 { color: #8e44ad; }
-        .score-board { font-size: 1.2em; color: #555; margin-bottom: 20px; }
-        .question-box { background: #f9f9f9; padding: 20px; border-left: 4px solid #3498db; margin: 20px 0; text-align: left; font-size: 1.1em; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; text-align: center; padding: 10px; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border-top: 6px solid #8e44ad; }
+        
+        h1 { color: #8e44ad; margin-bottom: 5px; }
+        h3 { color: #7f8c8d; font-size: 1em; margin-top: 0; }
+        
+        .score-board { font-size: 1.2em; color: #27ae60; font-weight: bold; margin: 15px 0; background: #e8f8f5; padding: 10px 20px; border-radius: 50px; display: inline-block; }
+        
+        .question-box { background: #f8f9fa; padding: 20px; border-radius: 12px; margin: 20px 0; text-align: center; border-bottom: 4px solid #8e44ad; }
+        .q-fr { font-size: 1.2em; font-weight: bold; color: #2c3e50; display: block; margin-bottom: 8px; }
+        .q-ar { font-size: 1.1em; color: #555; font-family: 'Amiri', 'Segoe UI', sans-serif; direction: rtl; display: block; }
+        
         .options { display: grid; grid-template-columns: 1fr; gap: 10px; }
-        button { padding: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1em; cursor: pointer; background: white; transition: all 0.3s; text-align: left; }
-        button:hover { background: #f0f0f0; border-color: #aaa; }
-        button.correct { background: #d4edda; border-color: #c3e6cb; color: #155724; }
-        button.wrong { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        
+        button { padding: 15px; border: 2px solid #e0e0e0; border-radius: 12px; cursor: pointer; background: white; transition: all 0.2s; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80px; }
+        button:hover { background: #f4f6f7; border-color: #8e44ad; transform: translateY(-2px); }
+        
+        .opt-fr { font-weight: bold; font-size: 1em; color: #2c3e50; }
+        .opt-ar { font-size: 0.95em; color: #666; font-family: 'Amiri', sans-serif; margin-top: 4px; direction: rtl;}
+        
+        button.correct { background: #d4edda; border-color: #28a745; }
+        button.correct .opt-fr { color: #155724; }
+        
+        button.wrong { background: #f8d7da; border-color: #dc3545; opacity: 0.8; }
+        button.wrong .opt-fr { color: #721c24; }
+        
         .hidden { display: none; }
-        #feedback { margin-top: 15px; font-weight: bold; }
-        .explanation { font-size: 0.9em; color: #666; margin-top: 5px; font-style: italic; }
+        
+        #feedback { margin-top: 20px; font-weight: bold; font-size: 1.3em; }
+        
+        .explanation { font-size: 0.95em; color: #444; margin-top: 15px; background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 5px solid #ffc107; text-align: left; }
+        .exp-ar { display: block; margin-top: 5px; color: #666; direction: rtl; text-align: right; }
+        
+        #next-btn, #restart-btn { margin-top: 20px; padding: 15px; background: #8e44ad; color: white; border: none; font-size: 1.1em; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; }
+        #next-btn:hover { background: #9b59b6; }
+        
+        .progress-container { width: 100%; background-color: #eee; border-radius: 10px; height: 8px; margin-bottom: 20px; overflow: hidden; }
+        .progress-bar { height: 100%; background-color: #8e44ad; width: 0%; transition: width 0.4s; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🎓 Quiz : Langues de Spécialité</h1>
-    <div class="score-board">Score: <span id="score">0</span></div>
+    <h1>🎓 Quiz LSP : Bilingual</h1>
+    <h3>Langues de Spécialité - لغات الاختصاص</h3>
+    
+    <div class="progress-container">
+        <div class="progress-bar" id="progress"></div>
+    </div>
+
+    <div class="score-board">Score: <span id="score">0</span> / <span id="total-questions">0</span></div>
     
     <div id="game-area">
-        <div class="question-box" id="question-text">Chargement...</div>
+        <div class="question-box">
+            <span id="q-icon" style="font-size: 2em; display:block; margin-bottom:10px;"></span>
+            <span id="q-fr" class="q-fr">Chargement...</span>
+            <span id="q-ar" class="q-ar">جاري التحميل...</span>
+        </div>
+        
         <div class="options" id="options-container"></div>
+        
         <div id="feedback"></div>
-        <div id="explanation" class="explanation"></div>
-        <br>
-        <button id="next-btn" class="hidden" style="text-align:center; background:#8e44ad; color:white;" onclick="nextQuestion()">Question Suivante ➡️</button>
+        <div id="explanation" class="explanation hidden">
+            <strong id="exp-fr"></strong>
+            <span id="exp-ar" class="exp-ar"></span>
+        </div>
+        
+        <button id="next-btn" class="hidden" onclick="nextQuestion()">Suivant / السؤال التالي ➡️</button>
     </div>
 
     <div id="result-area" class="hidden">
-        <h2>Félicitations ! 🎓</h2>
-        <p>Tu as terminé la révision du module LSP.</p>
-        <p id="final-score"></p>
-        <button onclick="location.reload()" style="text-align:center; background:#2c3e50; color:white;">Recommencer 🔄</button>
+        <h2>🎉 Félicitations ! / مبروك</h2>
+        <p>Tu as terminé la révision. / لقد أنهيت المراجعة</p>
+        <h3 id="final-msg" style="color:#8e44ad; font-size: 1.5em;"></h3>
+        <button id="restart-btn" onclick="location.reload()">Rejouer 🔄 إعادة اللعب</button>
     </div>
 </div>
 
 <script>
-    // الأسئلة مأخوذة مباشرة من الملخص الذي قدمته
+    // قاعدة البيانات: أسئلة + ترجمة + أيقونات
     const questions = [
+        // 1. Théorie
         { 
-            q: "Selon les fonctionnalistes (Halliday & Matthiessen), quelle est la place du lexique ?", 
+            icon: "🧠",
+            q_fr: "Selon les fonctionnalistes (Halliday), quelle est la place du lexique ?", 
+            q_ar: "وفقاً للوظيفيين (Halliday)، ما هي مكانة المعجم؟",
             options: [
-                "C'est une composante de base de la grammaire.",
-                "C'est une facette du système qui contribue au sens global.",
-                "Il ne fait pas partie de la langue."
+                { fr: "Composante de base de la grammaire", ar: "مكون أساسي للقواعد" },
+                { fr: "Facette du système (Sens global)", ar: "جانب من النظام يساهم في المعنى العام" },
+                { fr: "Élément secondaire", ar: "عنصر ثانوي" }
             ], 
-            answer: 1,
-            exp: "Pour les générativistes, c'est une composante de la grammaire. Pour les fonctionnalistes, il contribue au sens global."
+            answer: 1, 
+            exp_fr: "Pour les fonctionnalistes, le lexique contribue au sens global.",
+            exp_ar: "بالنسبة للوظيفيين، يساهم المعجم في بناء المعنى العام."
         },
         { 
-            q: "Quelle est la différence fondamentale entre Lexique Général et Lexique Spécialisé concernant le SENS ?", 
+            icon: "⚖️",
+            q_fr: "Le débat Wüster/Lerat : Qu'est-ce qui distingue la langue de spécialité ?", 
+            q_ar: "جدل Wüster/Lerat: ما الذي يميز لغة الاختصاص فعلياً؟",
             options: [
-                "Général = Monosémie | Spécialisé = Polysémie",
-                "Général = Polysémie | Spécialisé = Monosémie",
-                "Les deux sont polysémiques."
+                { fr: "La syntaxe", ar: "النحو (التركيب)" },
+                { fr: "La morphologie", ar: "الصرف (البنية)" },
+                { fr: "Le lexique", ar: "المعجم (المصطلحات)" }
             ], 
-            answer: 1,
-            exp: "Le lexique spécialisé tend vers l'univocité (un seul sens) et la précision."
+            answer: 2, 
+            exp_fr: "La syntaxe est générale, seul le lexique est vraiment spécialisé.",
+            exp_ar: "النحو عام، بينما المعجم هو ما يميز التخصص فعلاً."
         },
         { 
-            q: "Comment appelle-t-on un sigle qui se prononce comme un mot (ex: Radar) ?", 
+            icon: "🌺",
+            q_fr: "L'Hyperonymie correspond à :", 
+            q_ar: "علاقة 'الاشتمال العام' (Hyperonymie) تعني:",
             options: [
-                "Une abréviation",
-                "Un sigle pur",
-                "Un acronyme"
+                { fr: "Terme inclus (ex: Rose)", ar: "مصطلح مندرج (مثال: وردة)" },
+                { fr: "Terme englobant (ex: Fleur)", ar: "مصطلح شامل (مثال: زهرة)" },
+                { fr: "Synonyme parfait", ar: "مرادف تام" }
             ], 
-            answer: 2,
-            exp: "Sigle = prononcé lettre par lettre (PNL). Acronyme = prononcé comme un mot (Radar, Sida)."
+            answer: 1, 
+            exp_fr: "Hyperonyme = Le mot général (Fleur). Hyponyme = Le mot spécifique (Rose).",
+            exp_ar: "الاشتمال العام (Hyperonyme) هو الكلمة الشاملة كـ 'زهرة'."
+        },
+
+        // 2. Général vs Spécialisé
+        { 
+            icon: "🌫️",
+            q_fr: "Le lexique général est marqué par :", 
+            q_ar: "يتميز المعجم العام بـ:",
+            options: [
+                { fr: "Monosémie (Un sens)", ar: "أحادية المعنى" },
+                { fr: "Polysémie et équivoque", ar: "تعدد المعاني والغموض" },
+                { fr: "Précision absolue", ar: "الدقة المطلقة" }
+            ], 
+            answer: 1, 
+            exp_fr: "Le lexique général a souvent plusieurs sens (Polysémie).",
+            exp_ar: "المعجم العام غالباً ما يحمل معانٍ متعددة (تعدد المعاني)."
         },
         { 
-            q: "Dans la formation des termes, qu'est-ce qu'un 'mot-valise' ?", 
+            icon: "🎯",
+            q_fr: "Le lexique spécialisé est :", 
+            q_ar: "المعجم المتخصص هو:",
             options: [
-                "L'ajout d'affixes à une racine.",
-                "La fusion de deux mots (ex: Informatique).",
-                "Un mot emprunté au latin."
+                { fr: "Connotatif", ar: "إيحائي" },
+                { fr: "Dénotatif et monoréférentiel", ar: "دلالي وأحادي المرجع" },
+                { fr: "Poétique", ar: "شاعري" }
             ], 
-            answer: 1,
-            exp: "Exemple : Information + Automatique = Informatique."
+            answer: 1, 
+            exp_fr: "Il désigne un seul objet précis sans émotion.",
+            exp_ar: "يشير إلى شيء واحد محدد دون عاطفة أو إيحاء."
         },
         { 
-            q: "Quelle est une caractéristique majeure du Discours Scientifique ?", 
+            icon: "🆕",
+            q_fr: "Le lexique spécialisé s'enrichit par :", 
+            q_ar: "يثري المعجم المتخصص نفسه عن طريق:",
             options: [
-                "L'usage intensif de la première personne (Je).",
-                "L'effacement énonciatif (usage du 'On' et voix passive).",
-                "L'expression forte des émotions."
+                { fr: "La diversification", ar: "التنويع" },
+                { fr: "La néologie", ar: "توليد المصطلحات (النيولوجيا)" },
+                { fr: "L'argot", ar: "العامية" }
             ], 
-            answer: 1,
-            exp: "Le discours scientifique cherche l'objectivité et l'absence d'émotivité."
+            answer: 1, 
+            exp_fr: "La néologie est la création de nouveaux mots pour les nouvelles inventions.",
+            exp_ar: "النيولوجيا هي خلق كلمات جديدة للمخترعات الجديدة."
+        },
+
+        // 3. Textes
+        { 
+            icon: "💼",
+            q_fr: "La finalité des textes spécialisés est :", 
+            q_ar: "الغاية من النصوص المتخصصة هي:",
+            options: [
+                { fr: "Informative ou professionnelle", ar: "معلوماتية أو مهنية" },
+                { fr: "Ludique", ar: "ترفيهية" },
+                { fr: "Narrative", ar: "سردية (قصصية)" }
+            ], 
+            answer: 0, 
+            exp_fr: "Le but est de transmettre une info ou faire un travail.",
+            exp_ar: "الهدف هو نقل معلومة أو إنجاز عمل مهني."
+        },
+
+        // 4. Morphologie
+        { 
+            icon: "🔗",
+            q_fr: "Un terme formé par ajout d'affixes (ex: Hypertension) :", 
+            q_ar: "مصطلح مُشكل بإضافة لواحق (مثال: Hypertension):",
+            options: [
+                { fr: "Terme simple", ar: "مصطلح بسيط" },
+                { fr: "Terme dérivé", ar: "مصطلح مشتق" },
+                { fr: "Terme composé", ar: "مصطلح مركب" }
+            ], 
+            answer: 1, 
+            exp_fr: "Dérivation = Racine + Préfixe/Suffixe.",
+            exp_ar: "الاشتقاق هو إضافة سوابق أو لواحق للجذر."
         },
         { 
-            q: "La relation sémantique où un terme spécifique est inclus dans un terme global (ex: Rose dans Fleur) est :", 
+            icon: "💾",
+            q_fr: "'Disque dur' est un :", 
+            q_ar: "'Disque dur' (قرص صلب) يعتبر:",
             options: [
-                "L'Hyperonymie",
-                "L'Hyponymie",
-                "La Synonymie"
+                { fr: "Composé savant", ar: "مركب علمي" },
+                { fr: "Composé populaire", ar: "مركب شعبي" },
+                { fr: "Mot-valise", ar: "كلمة مدمجة" }
             ], 
-            answer: 1,
-            exp: "Rose est un hyponyme de Fleur. Fleur est l'hyperonyme."
+            answer: 1, 
+            exp_fr: "Composé de mots courants (Disque + Dur).",
+            exp_ar: "مركب من كلمات شائعة متداولة."
+        },
+        { 
+            icon: "🗣️",
+            q_fr: "Quelle est la différence : Sigle vs Acronyme ?", 
+            q_ar: "ما الفرق بين Sigle و Acronyme ؟",
+            options: [
+                { fr: "Sigle = lettre par lettre | Acronyme = comme un mot", ar: "Sigle = حرف بحرف | Acronyme = ككلمة واحدة" },
+                { fr: "Aucune différence", ar: "لا يوجد فرق" },
+                { fr: "Acronyme = lettre par lettre", ar: "Acronyme = ينطق حرفاً بحرف" }
+            ], 
+            answer: 0, 
+            exp_fr: "Sigle : P.N.L / Acronyme : Radar, Sida.",
+            exp_ar: "Sigle ينطق حروفاً مقطعة (P.N.L)، بينما Acronyme ينطق ككلمة (Radar)."
+        },
+        { 
+            icon: "🧳",
+            q_fr: "Fusion de deux mots (Info + Automatique = Informatique) :", 
+            q_ar: "دمج كلمتين (مثل: Informatique) يسمى:",
+            options: [
+                { fr: "Troncation", ar: "القطع/الحذف" },
+                { fr: "Mot-valise", ar: "كلمة منحوتة (مدمجة)" },
+                { fr: "Emprunt", ar: "اقتراض" }
+            ], 
+            answer: 1, 
+            exp_fr: "C'est un mot-valise (Portmanteau word).",
+            exp_ar: "هذا يسمى الكلمة المنحوتة أو المدمجة (Mot-valise)."
+        },
+
+        // 5. Phénomènes
+        { 
+            icon: "🤝",
+            q_fr: "Les associations lexicales figées (ex: poser une question) :", 
+            q_ar: "التلازمات اللفظية الثابتة (مثل: طرح سؤالاً) تسمى:",
+            options: [
+                { fr: "Collocations", ar: "المتلازمات (Collocations)" },
+                { fr: "Métaphores", ar: "استعارات" },
+                { fr: "Transferts", ar: "نقل لغوي" }
+            ], 
+            answer: 0, 
+            exp_fr: "Les mots qui s'utilisent naturellement ensemble.",
+            exp_ar: "هي الكلمات التي تأتي معاً بشكل طبيعي وثابت."
+        },
+
+        // 6. Discours
+        { 
+            icon: "🏫",
+            q_fr: "Le discours destiné à l'enseignement est :", 
+            q_ar: "الخطاب الموجه للتعليم والتدريس هو:",
+            options: [
+                { fr: "Vulgarisateur", ar: "تبسيطي (للعامة)" },
+                { fr: "Spécialisé", ar: "تخصصي دقيق" },
+                { fr: "Didactique", ar: "تعليمي (ديداكتيكي)" }
+            ], 
+            answer: 2, 
+            exp_fr: "Didactique = Enseigner / Vulgariser = Simplifier pour le public.",
+            exp_ar: "الديداكتيكي للتعليم، والتبسيطي لعامة الناس."
+        },
+        { 
+            icon: "👻",
+            q_fr: "L'effacement énonciatif (Discours scientifique) utilise :", 
+            q_ar: "طمس الذات في الخطاب العلمي يتم عبر استخدام:",
+            options: [
+                { fr: "JE / MOI", ar: "أنا / نحن" },
+                { fr: "ON / Voix Passive", ar: "ON / المبني للمجهول" },
+                { fr: "Impératif", ar: "الأمر" }
+            ], 
+            answer: 1, 
+            exp_fr: "Pour être objectif, le scientifique s'efface (pas de 'Je').",
+            exp_ar: "لتحقيق الموضوعية، يختفي الباحث من النص (لا يستخدم 'أنا')."
+        },
+        { 
+            icon: "⏳",
+            q_fr: "Le temps verbal dominant en science :", 
+            q_ar: "الزمن الفعلي السائد في الخطاب العلمي:",
+            options: [
+                { fr: "Passé simple", ar: "الماضي البسيط" },
+                { fr: "Futur", ar: "المستقبل" },
+                { fr: "Présent de vérité générale", ar: "حاضر الحقيقة العامة" }
+            ], 
+            answer: 2, 
+            exp_fr: "Car les faits scientifiques sont toujours vrais.",
+            exp_ar: "لأن الحقائق العلمية ثابتة وصالحة في كل وقت."
         }
     ];
 
     let currentQuestionIndex = 0;
     let score = 0;
 
+    document.getElementById("total-questions").innerText = questions.length;
+
     function loadQuestion() {
         const q = questions[currentQuestionIndex];
-        document.getElementById("question-text").innerText = q.q;
+        
+        // تعيين الأيقونة والنصوص
+        document.getElementById("q-icon").innerText = q.icon;
+        document.getElementById("q-fr").innerText = q.q_fr;
+        document.getElementById("q-ar").innerText = q.q_ar;
+        
         const optionsDiv = document.getElementById("options-container");
         optionsDiv.innerHTML = "";
+        
         document.getElementById("feedback").innerText = "";
-        document.getElementById("explanation").innerText = "";
+        document.getElementById("explanation").classList.add("hidden");
         document.getElementById("next-btn").classList.add("hidden");
+
+        // شريط التقدم
+        let progressPercent = (currentQuestionIndex / questions.length) * 100;
+        document.getElementById("progress").style.width = progressPercent + "%";
 
         q.options.forEach((opt, index) => {
             const btn = document.createElement("button");
-            btn.innerText = opt;
+            // إضافة النص الفرنسي والعربي داخل الزر
+            btn.innerHTML = `<span class="opt-fr">${opt.fr}</span><span class="opt-ar">${opt.ar}</span>`;
             btn.onclick = () => checkAnswer(index, btn);
             optionsDiv.appendChild(btn);
         });
@@ -135,17 +334,19 @@
 
         if (selectedIndex === q.answer) {
             btnElement.classList.add("correct");
-            document.getElementById("feedback").innerText = "Correct ! ✅";
-            document.getElementById("feedback").style.color = "#155724";
+            document.getElementById("feedback").innerHTML = "<span style='color:#27ae60'>Correct ! ✅ صحيح</span>";
             score++;
             document.getElementById("score").innerText = score;
         } else {
             btnElement.classList.add("wrong");
             buttons[q.answer].classList.add("correct");
-            document.getElementById("feedback").innerText = "Incorrect ❌";
-            document.getElementById("feedback").style.color = "#721c24";
+            document.getElementById("feedback").innerHTML = "<span style='color:#c0392b'>Incorrect ❌ خطأ</span>";
         }
-        document.getElementById("explanation").innerText = "💡 Note : " + q.exp;
+        
+        // إظهار الشرح
+        document.getElementById("exp-fr").innerText = q.exp_fr;
+        document.getElementById("exp-ar").innerText = q.exp_ar;
+        document.getElementById("explanation").classList.remove("hidden");
         document.getElementById("next-btn").classList.remove("hidden");
     }
 
@@ -156,10 +357,20 @@
         } else {
             document.getElementById("game-area").classList.add("hidden");
             document.getElementById("result-area").classList.remove("hidden");
-            document.getElementById("final-score").innerText = "Votre score final : " + score + " / " + questions.length;
+            document.getElementById("progress").style.width = "100%";
+            
+            let percentage = (score / questions.length) * 100;
+            let msg = "";
+            if(percentage === 100) msg = "Parfait! / ممتاز";
+            else if(percentage >= 80) msg = "Excellent! / جيد جداً";
+            else if(percentage >= 50) msg = "Bien! / جيد";
+            else msg = "Révision nécessaire / يحتاج مراجعة";
+            
+            document.getElementById("final-msg").innerText = msg;
         }
     }
 
+    // تشغيل اللعبة
     loadQuestion();
 </script>
 
